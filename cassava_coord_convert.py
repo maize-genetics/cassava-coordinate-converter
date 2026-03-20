@@ -277,23 +277,14 @@ app_ui = ui.page_fluid(
         
         # Quick examples and setup info
         ui.div(
-            {"class": "card"},
-            ui.h4("🌿 Cassava Examples:"),
-            ui.tags.ul(
-                ui.tags.li("Single position: Chromosome01:1500000"),
-                ui.tags.li("Range: Chromosome05:2000000 to 2001000"), 
-                ui.tags.li("Different chromosome: Chromosome18:500000")
-            ),
-            
-            ui.h4("📁 Required Chain Files (.gz):"),
-            ui.div(
-                {"class": "chain-info"},
-                ui.p("Place these files in the chain_files/ directory:"),
-                ui.tags.ul(
-                    ui.tags.li("Mesculenta_305_v6.to_v7.final.numeric.chain.gz"),
-                    ui.tags.li("Mesculenta_671_v8.0fromv6.0.final.chain.gz"),
-                    ui.tags.li("Mesculenta_671_v8.0fromv7.0.final.chain.gz")
-                )
+  	   {"class": "card"},
+    	   ui.h4("🌿 How to Use:"),
+           ui.tags.ol(
+               ui.tags.li("Chromosome: Enter Chromosome01 (or 02, 03, ..., 18)"),
+               ui.tags.li("Position: Enter 1500000 (any 1-based position)"), 
+               ui.tags.li("End Position: Leave blank for single position, or enter end coordinate for ranges"),
+               ui.tags.li("Select conversion: v6 → v7, v6 → v8, or v7 → v8"),
+               ui.tags.li("Click Convert!")
             )
         )
     )
