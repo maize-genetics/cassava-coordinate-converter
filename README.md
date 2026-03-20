@@ -7,7 +7,7 @@ Web app for converting genomic coordinates between cassava reference genomes:
 
 ## Usage
 
-1. Enter your chromosome (in format like Chromosome01 -- Chromosome18)
+1. Enter your chromosome (in format like 1 - 18)
 2. Enter position (e.g., 154119589) (1-based, do not convert into bed format)  
 3. Optionally enter end position for ranges
 4. Select conversion type (e.g., v6 → v8)
