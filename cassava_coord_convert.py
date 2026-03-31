@@ -30,9 +30,9 @@ def check_chain_files():
         chain_path = config["local_path"]
         if Path(chain_path).exists():
             available_chains[conversion] = chain_path
-            print(f"✅ Found: {conversion} ({config['filename']})")
+            print(f"Found: {conversion} ({config['filename']})")
         else:
-            print(f"❌ Missing: {chain_path}")
+            print(f"Missing: {chain_path}")
     
     return available_chains
 
@@ -89,18 +89,18 @@ def get_chain_chromosome_format(conversion, user_chromosome):
         return user_chromosome
 
 # Initialize chain files
-print("🌿 Checking cassava chain files...")
+print("Checking cassava chain files...")
 AVAILABLE_CHAINS = check_chain_files()
-print(f"✅ Ready with {len(AVAILABLE_CHAINS)} cassava genome conversions!")
+print(f"Ready with {len(AVAILABLE_CHAINS)} cassava genome conversions!")
 
 if not AVAILABLE_CHAINS:
-    print("⚠️  No chain files found. Please add your cassava chain files to the chain_files/ directory")
+    print("No chain files found. Please add your cassava chain files to the chain_files/ directory")
 
 # UI - Cassava-themed
 app_ui = ui.page_fluid(
     # Custom CSS for cassava theme
     ui.tags.head(
-        ui.tags.title("🌿 Cassava Genomic Coordinate Converter"),
+        ui.tags.title("Cassava Genomic Coordinate Converter"),
         ui.tags.style("""
             body { 
                 font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -208,13 +208,13 @@ app_ui = ui.page_fluid(
         {"class": "main-container"},
         
         # Header
-        ui.h1("🌿 Cassava Genomic Coordinate Converter", class_="title"),
+        ui.h1("Cassava Genomic Coordinate Converter", class_="title"),
         ui.p("Convert coordinates between cassava reference genome versions", class_="subtitle"),
         
         # Info panel
         ui.div(
             {"class": "cassava-info"},
-            ui.h4("🧬 Available Cassava Conversions"),
+            ui.h4("Available Cassava Conversions"),
             ui.p("v6 → v7 • v6 → v8 • v7 → v8"),
             ui.p("Chromosomes: Chromosome01 - Chromosome18")
         ),
@@ -268,7 +268,7 @@ app_ui = ui.page_fluid(
             ui.output_ui("chain_file_info"),
             
             # Convert button
-            ui.input_action_button("convert", "🔄 Convert Coordinate", 
+            ui.input_action_button("convert", "Convert Coordinate", 
                                  class_="btn-convert"),
             
             # Result area
@@ -277,14 +277,44 @@ app_ui = ui.page_fluid(
         
         # Quick examples and setup info
         ui.div(
-  	   {"class": "card"},
-    	   ui.h4("🌿 How to Use:"),
-           ui.tags.ol(
-               ui.tags.li("Chromosome: Enter Chromosome01 (or 02, 03, ..., 18)"),
-               ui.tags.li("Position: Enter 1500000 (any 1-based position)"), 
-               ui.tags.li("End Position: Leave blank for single position, or enter end coordinate for ranges"),
-               ui.tags.li("Select conversion: v6 → v7, v6 → v8, or v7 → v8"),
-               ui.tags.li("Click Convert!")
+            {"class": "card"},
+            ui.h4("How to Use:"),
+            ui.tags.ol(
+                ui.tags.li("Chromosome: Enter Chromosome01 (or 02, 03, ..., 18)"),
+                ui.tags.li("Position: Enter 1500000 (any 1-based position)"), 
+                ui.tags.li("End Position: Leave blank for single position, or enter end coordinate for ranges"),
+                ui.tags.li("Select conversion: v6 → v7, v6 → v8, or v7 → v8"),
+                ui.tags.li("Click Convert!")
+            )
+        ),
+
+        # References
+        ui.div(
+            {"class": "card"},
+            ui.h4("References & Data Sources:"),
+            ui.div(
+                {"class": "chain-info"},
+                ui.p("This tool uses liftOver chain files for cassava genome coordinate conversion:"),
+                ui.tags.ul(
+                    ui.tags.li("v6 → v7: Mesculenta_305_v6.to_v7.final.numeric.chain"),
+                    ui.tags.li("v6 → v8: Mesculenta_671_v8.0fromv6.0.final.chain.gz"),
+                    ui.tags.li("v7 → v8: Mesculenta_671_v8.0fromv7.0.final.chain.gz")
+            ),
+            ui.hr(),
+            ui.h5("Cassava Reference Genomes:"),
+            ui.p(ui.strong("v6 and v7:"), " Bredeson, J. V., Lyons, J. B., Prochnik, S. E., Wu, G. A., Ha, C. M., Edsinger-Gonzales, E., … Rokhsar, D. S. (2016). Sequencing wild and cultivated cassava and related species reveals extensive interspecific hybridization and genetic diversity. ", 
+                    ui.tags.em("Nature Biotechnology"), ", 34(5), 562–570."),
+            ui.p(ui.strong("v8:"), " ", 
+                ui.tags.a("Mesculenta v8.1", href="https://phytozome-next.jgi.doe.gov/info/Mesculenta_v8_1", target="_blank"),
+                 " - Phytozome, Joint Genome Institute"),
+            ui.hr(),
+            ui.h5("Tools:"),
+            ui.p("Coordinate conversion powered by ", 
+                ui.tags.a("CrossMap", href="https://crossmap.readthedocs.io/", target="_blank"), 
+                " - Zhao, H., et al. (2014). CrossMap: a versatile tool for coordinate conversion between genome assemblies. ", 
+                ui.tags.em("Bioinformatics"), ", 30(7), 1006-1007."),
+            ui.p("Web interface built with ", 
+                ui.tags.a("Shiny for Python", href="https://shiny.posit.co/py/", target="_blank"))
             )
         )
     )
@@ -300,7 +330,7 @@ def server(input, output, session):
             filename = CASSAVA_CHAIN_CONFIGS[input.conversion()]["filename"]
             return ui.div(
                 {"class": "chain-info"},
-                f"📎 Using chain file: {filename}"
+                f"Using chain file: {filename}"
             )
         return ui.div()
     
@@ -312,7 +342,7 @@ def server(input, output, session):
         if not AVAILABLE_CHAINS:
             return ui.div(
                 {"class": "result-error"},
-                "❌ No cassava chain files found",
+                "No cassava chain files found",
                 ui.br(), ui.br(),
                 "Please add the following files to the chain_files/ directory:",
                 ui.tags.ul(
@@ -326,13 +356,13 @@ def server(input, output, session):
         if not input.conversion() or not input.chromosome() or not input.position():
             return ui.div(
                 {"class": "result-error"},
-                "⚠️ Please fill in all required fields (Chromosome and Position)"
+                "Please fill in all required fields (Chromosome and Position)"
             )
         
         if input.conversion() not in AVAILABLE_CHAINS:
             return ui.div(
                 {"class": "result-error"}, 
-                f"❌ Conversion '{input.conversion()}' not available. Available: {', '.join(AVAILABLE_CHAINS.keys())}"
+                f"Conversion '{input.conversion()}' not available. Available: {', '.join(AVAILABLE_CHAINS.keys())}"
             )
         
         # Validate cassava chromosome format
@@ -340,7 +370,7 @@ def server(input, output, session):
         if not chromosome.startswith("Chromosome"):
             return ui.div(
                 {"class": "result-error"},
-                "⚠️ Please use cassava chromosome format: Chromosome01, Chromosome02, ..., Chromosome18"
+                "Please use cassava chromosome format: Chromosome01, Chromosome02, ..., Chromosome18"
             )
         
         # Extract chromosome number and validate
@@ -349,12 +379,12 @@ def server(input, output, session):
             if chr_num < 1 or chr_num > 18:
                 return ui.div(
                     {"class": "result-error"},
-                    "⚠️ Cassava has 18 chromosomes. Please use Chromosome01 - Chromosome18"
+                    "Cassava has 18 chromosomes. Please use Chromosome01 - Chromosome18"
                 )
         except ValueError:
             return ui.div(
                 {"class": "result-error"},
-                "⚠️ Invalid chromosome format. Use: Chromosome01, Chromosome02, etc."
+                "Invalid chromosome format. Use: Chromosome01, Chromosome02, etc."
             )
         
         # Prepare coordinate
@@ -367,7 +397,7 @@ def server(input, output, session):
         if not chr_for_chain:
             return ui.div(
                 {"class": "result-error"},
-                f"⚠️ Could not convert chromosome format for '{chromosome}'"
+                f"Could not convert chromosome format for '{chromosome}'"
             )
 
         # Create BED format input (0-based coordinates for CrossMap)
@@ -392,7 +422,7 @@ def server(input, output, session):
             if not output_lines:
                 return ui.div(
                     {"class": "result-error"},
-                    "❌ No conversion result - coordinate may not exist in target genome version"
+                    "No conversion result - coordinate may not exist in target genome version"
                 )
             
             output_line = output_lines[0]
@@ -426,11 +456,11 @@ def server(input, output, session):
                 
                 return ui.div(
                     {"class": "result-success"},
-                    ui.h4("✅ Cassava Coordinate Conversion Successful!"),
-                    ui.p("🌿 ", ui.strong("Original: "), ui.span(original_display, class_="coordinate-display")),
-                    ui.p("🎯 ", ui.strong("Converted: "), ui.span(converted_display, class_="coordinate-display")),
+                    ui.h4("Cassava Coordinate Conversion Successful!"),
+                    ui.p("", ui.strong("Original: "), ui.span(original_display, class_="coordinate-display")),
+                    ui.p("", ui.strong("Converted: "), ui.span(converted_display, class_="coordinate-display")),
                     ui.hr(),
-                    ui.p("📋 Copy this result:"),
+                    ui.p("Copy this result:"),
                     ui.tags.code(converted_display, 
                                 style="background: #e8f5e8; padding: 8px 15px; border-radius: 6px; font-size: 16px;"),
                     ui.br(), ui.br(),
@@ -442,14 +472,14 @@ def server(input, output, session):
             else:
                 return ui.div(
                     {"class": "result-error"},
-                    "❌ Invalid conversion result format"
+                    "Invalid conversion result format"
                 )
         else:
             return ui.div(
                 {"class": "result-error"},
-                f"❌ Conversion failed: {result['error']}",
+                f"Conversion failed: {result['error']}",
                 ui.br(), ui.br(),
-                "💡 This could mean:",
+                "This could mean:",
                 ui.tags.ul(
                     ui.tags.li("The coordinate doesn't exist in the target genome version"),
                     ui.tags.li("The chromosome name format is incorrect"),
