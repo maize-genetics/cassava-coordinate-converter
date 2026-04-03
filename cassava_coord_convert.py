@@ -19,6 +19,10 @@ CASSAVA_CHAIN_CONFIGS = {
     "v7 → v8": {
         "filename": "Mesculenta_671_v8.0fromv7.0.final.chain.gz",
         "local_path": "chain_files/Mesculenta_671_v8.0fromv7.0.final.chain.gz"
+    },
+    "M. flabellifolia '4144' → cassava v8": {
+        "filename": "FLA_4144_R1_Mesculenta_671_v8.0.fa_Q1.chain",
+        "local_path": "chain_files/FLA_4144_R1_Mesculenta_671_v8.0.fa_Q1.chain"
     }
 }
 
@@ -67,8 +71,12 @@ def run_crossmap(chain_file, input_data):
 
 def get_chain_chromosome_format(conversion, user_chromosome):
     """Convert user chromosome format to match the specific chain file"""
+
+    if conversion == "M. flabellifolia '4144' → cassava v8":
+        # For M. flabellifolia, user enters GWHERLK format directly
+        return user_chromosome
     
-    # Extract the number from user input (e.g., "Chromosome14" -> 14)
+    # Extract the number from user input (e.g., "Chromosome14" -> 14) for cassava only conversions
     try:
         chr_num = int(user_chromosome.replace("Chromosome", ""))
     except ValueError:
@@ -201,6 +209,7 @@ app_ui = ui.page_fluid(
                 font-size: 0.9em;
                 color: #6c757d;
             }
+            em { font-style: italic; }
         """)
     ),
     
@@ -216,7 +225,9 @@ app_ui = ui.page_fluid(
             {"class": "cassava-info"},
             ui.h4("Available Cassava Conversions"),
             ui.p("v6 → v7 • v6 → v8 • v7 → v8"),
-            ui.p("Chromosomes: Chromosome01 - Chromosome18")
+            ui.p("Chromosomes: Chromosome01 - Chromosome18"),
+            ui.p(ui.tags.em("M. flabellifolia"), " '4144' → cassava v8"),
+            ui.p("Chromosomes: GWHERLK00000###")
         ),
         
         # Main conversion card
@@ -231,7 +242,7 @@ app_ui = ui.page_fluid(
                         ui.input_text("chromosome", "Chromosome:", 
                                     value="Chromosome01", 
                                     placeholder="Chromosome01, Chromosome02, ..."),
-                        ui.div("Format: Chromosome01 - Chromosome18", class_="chromosome-examples")
+                        ui.div("Cassava: Chromosome01-18 • ", ui.tags.em("M. flabellifolia"), ": GWHERLK00000001, etc.", class_="chromosome-examples")
                     )
                 ),
                 ui.column(4,
@@ -280,12 +291,12 @@ app_ui = ui.page_fluid(
             {"class": "card"},
             ui.h4("How to Use:"),
             ui.tags.ol(
-                ui.tags.li("Chromosome: Enter Chromosome01 (or 02, 03, ..., 18)"),
-                ui.tags.li("Position: Enter 1500000 (any 1-based position)"), 
+                ui.tags.li("Chromosome: Enter like Chromosome01 (cassava) OR GWHERLK00000018 (", ui.tags.em("M. flabellifolia"), ")"),
+                ui.tags.li("Position: Enter coordinate (1-based)"), 
                 ui.tags.li("End Position: Leave blank for single position, or enter end coordinate for ranges"),
-                ui.tags.li("Select conversion: v6 → v7, v6 → v8, or v7 → v8"),
-                ui.tags.li("Click Convert!")
-            )
+                ui.tags.li("Select conversion type"),
+                ui.tags.li("Click Convert")
+            )    
         ),
 
         # References
@@ -298,15 +309,19 @@ app_ui = ui.page_fluid(
                 ui.tags.ul(
                     ui.tags.li("v6 → v7: Mesculenta_305_v6.to_v7.final.numeric.chain"),
                     ui.tags.li("v6 → v8: Mesculenta_671_v8.0fromv6.0.final.chain.gz"),
-                    ui.tags.li("v7 → v8: Mesculenta_671_v8.0fromv7.0.final.chain.gz")
+                    ui.tags.li("v7 → v8: Mesculenta_671_v8.0fromv7.0.final.chain.gz"),
+                    ui.tags.li(ui.tags.em("M. flabellifolia"), " '4144' → ", "cassava v8: FLA_4144_R1_Mesculenta_671_v8.0.fa_Q1.chain")
             ),
             ui.hr(),
-            ui.h5("Cassava Reference Genomes:"),
+            ui.h5("Reference Genomes:"),
             ui.p(ui.strong("v6 and v7:"), " Bredeson, J. V., Lyons, J. B., Prochnik, S. E., Wu, G. A., Ha, C. M., Edsinger-Gonzales, E., … Rokhsar, D. S. (2016). Sequencing wild and cultivated cassava and related species reveals extensive interspecific hybridization and genetic diversity. ", 
                     ui.tags.em("Nature Biotechnology"), ", 34(5), 562–570."),
             ui.p(ui.strong("v8:"), " ", 
                 ui.tags.a("Mesculenta v8.1", href="https://phytozome-next.jgi.doe.gov/info/Mesculenta_v8_1", target="_blank"),
                  " - Phytozome, Joint Genome Institute"),
+            ui.p(ui.strong(ui.tags.em("M. flabellifolia"), " '4144':"), " Xia, Z., Du, Z., Zhou, X., Jiang, S., Zhu, T., Wang, L., … Wang, W. (2025). Pan-genome and haplotype map of cassava cultivars and wild ancestors provide insights into its adaptive evolution and domestication. ", 
+                 ui.tags.em("Molecular Plant"), ", 18(6), 1047-1071."),
+            ui.p(ui.strong(ui.tags.em("M. flabellifolia"), " '4144' chain file:"), " Mamerto, A., Gnanapragasam, N. … Econopouly, B.F., & Michael, T.P. (in prep)."),
             ui.hr(),
             ui.h5("Tools:"),
             ui.p("Coordinate conversion powered by ", 
@@ -367,25 +382,35 @@ def server(input, output, session):
         
         # Validate cassava chromosome format
         chromosome = input.chromosome().strip()
-        if not chromosome.startswith("Chromosome"):
-            return ui.div(
-                {"class": "result-error"},
-                "Please use cassava chromosome format: Chromosome01, Chromosome02, ..., Chromosome18"
-            )
-        
-        # Extract chromosome number and validate
-        try:
-            chr_num = int(chromosome.replace("Chromosome", ""))
-            if chr_num < 1 or chr_num > 18:
+
+        if input.conversion() == "M. flabellifolia '4144' → cassava v8":
+            # Validate M. flabellifolia format
+            if not chromosome.startswith("GWHERLK"):
                 return ui.div(
                     {"class": "result-error"},
-                    "Cassava has 18 chromosomes. Please use Chromosome01 - Chromosome18"
+                    "For M. flabellifolia, please use format: GWHERLK00000018, GWHERLK00000002, etc."
                 )
-        except ValueError:
-            return ui.div(
-                {"class": "result-error"},
-                "Invalid chromosome format. Use: Chromosome01, Chromosome02, etc."
-            )
+        else:
+            # Validate cassava format
+            if not chromosome.startswith("Chromosome"):
+                return ui.div(
+                    {"class": "result-error"},
+                    "For cassava, please use format: Chromosome01, Chromosome02, ..., Chromosome18"
+                )
+        
+            # Extract chromosome number and validate (only for cassava)
+            try:
+                chr_num = int(chromosome.replace("Chromosome", ""))
+                if chr_num < 1 or chr_num > 18:
+                    return ui.div(
+                        {"class": "result-error"},
+                        "Cassava has 18 chromosomes. Please use Chromosome01 - Chromosome18"
+                    )
+            except ValueError:
+                return ui.div(
+                    {"class": "result-error"},
+                    "Invalid chromosome format. Use: Chromosome01, Chromosome02, etc."
+                )
         
         # Prepare coordinate
         position = int(input.position())
@@ -493,4 +518,4 @@ def server(input, output, session):
 app = App(app_ui, server)
 
 if __name__ == "__main__":
-    app.run(port=8000, host="0.0.0.0")
+    app.run(port=7860, host="0.0.0.0")
