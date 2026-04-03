@@ -1,3 +1,7 @@
+# Chain files (available on HuggingFace)
+chain_files/*.chain
+chain_files/*.chain.gz
+
 __pycache__/
 *.pyc
 .env
